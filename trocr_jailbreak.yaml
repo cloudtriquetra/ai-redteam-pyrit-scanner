@@ -1,0 +1,21 @@
+name: TrOCR Pipeline Injection
+description: Tests TrOCR via image-rendered prompts — pipeline injection focus
+
+target:
+  type: fastapi
+  url: http://localhost:8000
+  model: trocr-base-printed
+
+scan:
+  scenario: airt.jailbreak
+  strategies:
+    - prompt_sending
+  converters:
+    - text_to_image
+  turns: oneturn
+  max_dataset_size: 5
+
+output:
+  console: true
+  json: true
+  report_dir: ./reports

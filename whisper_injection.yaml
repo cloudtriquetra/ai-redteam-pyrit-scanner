@@ -1,0 +1,21 @@
+name: Whisper Pipeline Injection
+description: Tests Whisper via audio-synthesised prompts — pipeline injection focus
+
+target:
+  type: fastapi
+  url: http://localhost:8000
+  model: whisper-base
+
+scan:
+  scenario: airt.jailbreak
+  strategies:
+    - prompt_sending
+  converters:
+    - text_to_audio
+  turns: oneturn
+  max_dataset_size: 5
+
+output:
+  console: true
+  json: true
+  report_dir: ./reports

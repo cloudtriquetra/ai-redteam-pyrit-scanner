@@ -1,0 +1,22 @@
+name: Claude Haiku Jailbreak
+description: Jailbreak testing against Claude Haiku with text converters
+
+target:
+  type: claude
+  model: claude-haiku-4-5-20251001
+
+scan:
+  scenario: airt.jailbreak
+  strategies:
+    - prompt_sending
+    - many_shot
+  converters:
+    - base64
+    - leetspeak
+  turns: oneturn
+  max_dataset_size: 5
+
+output:
+  console: true
+  json: true
+  report_dir: ./reports

@@ -1,0 +1,6 @@
+pyrit==0.12.1
+anthropic>=0.40.0      # for claude targets via openai compat layer
+openai>=1.50.0         # used by PyRIT OpenAIChatTarget
+pyyaml>=6.0
+rich>=13.0.0           # console output formatting
+python-dotenv>=1.0.0   # load .env files
