@@ -1,0 +1,21 @@
+name: Claude Haiku Content Harms
+description: Content harms testing against Claude Haiku
+
+target:
+  type: claude
+  model: claude-haiku-4-5-20251001
+
+scan:
+  scenario: airt.content_harms
+  strategies:
+    - hate
+    - violence
+    - harassment
+  converters: []
+  turns: oneturn
+  max_dataset_size: 3
+
+output:
+  console: true
+  json: true
+  report_dir: ./reports
