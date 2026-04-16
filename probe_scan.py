@@ -20,6 +20,7 @@ Exit codes:
 
 from __future__ import annotations
 
+import base64
 import argparse
 import json
 import sys
@@ -145,19 +146,35 @@ def evaluate_probe(
             error=f"Asset not found: {asset_path}", notes=notes,
         )
 
-    # ── Build multipart payload ───────────────────────────────────────────────
+    # ── Build JSON payload with base64-encoded asset ─────────────────────────
+    # vlm_server.py /inference expects:
+    #   {"model": str, "prompt": str, "image_base64": "<base64>"}
     started = time.monotonic()
     try:
         with open(asset_path, "rb") as fh:
-            files  = {asset_key: (asset_path.name, fh, _mime_type(asset_path))}
-            data   = {"model": model, "prompt": prompt}
-            resp   = requests.post(
-                f"{target_url}/inference",
-                files=files,
-                data=data,
-                timeout=timeout,
+            asset_b64 = base64.b64encode(fh.read()).decode("utf-8")
+
+        # Server field: image_base64 for images, prompt carries audio path for audio
+        if asset_key == "image":
+            payload = {"model": model, "prompt": prompt, "image_base64": asset_b64}
+        else:
+            # audio — server doesn't support audio yet; send as prompt fallback
+            payload = {"model": model, "prompt": prompt, "image_base64": asset_b64}
+
+        resp = requests.post(
+            f"{target_url}/inference",
+            json=payload,
+            timeout=timeout,
+        )
+        if not resp.ok:
+            try:
+                err_body = resp.json()
+            except Exception:
+                err_body = resp.text[:500]
+            raise requests.exceptions.HTTPError(
+                f"{resp.status_code} {resp.reason} — {err_body}",
+                response=resp,
             )
-        resp.raise_for_status()
         response_text = resp.json().get("output", "")
     except requests.exceptions.Timeout:
         return _error_result(
