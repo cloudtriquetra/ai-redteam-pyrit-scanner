@@ -440,6 +440,9 @@ python3 probe_scan.py --model paddleocr-vl --url http://localhost:8000
 # Restrict to specific families
 python3 probe_scan.py --model paddleocr-vl --families ocr_fidelity prompt_injection pii_leakage
 
+# ✗ Common mistake — comma-separated silently matches nothing
+# python3 probe_scan.py --model paddleocr-vl --families ocr_fidelity,prompt_injection
+
 # Whisper — audio families only (image families auto-skipped via thresholds.yaml)
 python3 probe_scan.py --model whisper-base --families audio_fidelity
 
@@ -456,7 +459,7 @@ python3 probe_scan.py --model trocr-base-printed --dry-run
 | `--probe-dir`  | Directory containing probe YAML files    | `./probes`              |
 | `--thresholds` | Path to `thresholds.yaml`                | `./thresholds.yaml`     |
 | `--report-dir` | Directory to write JSON report           | `./reports`             |
-| `--families`   | Restrict scan to named families          | all families            |
+| `--families`   | Space-separated list of family names to run | all families         |
 | `--timeout`    | Per-probe request timeout (seconds)      | `120`                   |
 | `--dry-run`    | List probes without executing            | false                   |
 | `--no-rich`    | Disable rich console output              | false                   |
@@ -694,6 +697,41 @@ python3 probe_scan.py \
 - `--converters text_to_audio` in `scan.py` — needs Azure Speech Services
 - `--memory azure_sql` in `scan.py` — needs Azure SQL
 - Real speech in `probe_scan.py` audio probes — needs `pyttsx3` or `gTTS`; silent placeholder always works as a fallback
+
+---
+
+---
+
+## ai-redteam-server — Compatibility Notes
+
+The server's `requirements.txt` pins `transformers<5.0.0`. This is intentional:
+
+- transformers 5.x removed `visual-question-answering` from `pipeline()` task names — models.yaml uses the 4.x names
+- transformers 5.x introduced a `rope_type='default'` validation that breaks several models including PaddleOCR-VL-1.5
+- The `<5.0.0` pin keeps `pipeline()` task names aligned with models.yaml entries
+
+**Do not upgrade transformers beyond 4.x on the server without testing all registered models.**
+
+---
+
+## Known Issues
+
+### PaddleOCR-VL-1.5 — transformers compatibility
+
+PaddleOCR-VL-1.5 currently fails to load under both transformers 4.x and 5.x:
+
+- **transformers 4.x** — the model's HuggingFace-hosted custom code imports `transformers.masking_utils` and `transformers.modeling_layers` which were only introduced in transformers 5.x
+- **transformers 5.x** — the built-in `PaddleOCRVLForConditionalGeneration` class has a broken `rope_type='default'` config validation that blocks loading via `AutoModelForImageTextToText`; loading via `AutoModelForCausalLM` hits the same validation in transformers core
+
+The model's custom code targets an intermediate internal build of transformers 5.x that has not been released as a stable package version.
+
+**Workaround options:**
+
+1. Use the official PaddleOCR inference pipeline (`pip install paddlepaddle paddleocr`) instead of the transformers route — the model card recommends this for production use
+2. Wait for a model card update from PaddlePaddle that targets a stable transformers release
+3. Use `trocr-base-printed`, `blip-base`, or `moondream2` to validate the probe pipeline end-to-end in the interim
+
+**Impact:** Only `probe_scan.py` runs targeting `paddleocr-vl-1.5` are affected. All other models, `scan.py`, and `generate_assets.py` are unaffected.
 
 ---
 
