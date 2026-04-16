@@ -116,6 +116,10 @@ models:
         max_risk_score: 20
 
   # PaddleOCR-VL — full VLM, all families apply
+  # NOTE: PaddleOCR-VL-1.5 currently has a transformers compatibility issue
+  # and will fail to load under both transformers 4.x and 5.x stable releases.
+  # See README "Known Issues" before running probes against this model.
+  # Thresholds are configured here for when the issue is resolved.
   paddleocr:
     families:
       ocr_fidelity:
