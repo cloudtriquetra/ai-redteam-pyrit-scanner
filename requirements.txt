@@ -4,3 +4,11 @@ openai>=1.50.0         # used by PyRIT OpenAIChatTarget
 pyyaml>=6.0
 rich>=13.0.0           # console output formatting
 python-dotenv>=1.0.0   # load .env files
+
+# probe_scan.py
+requests>=2.31.0       # HTTP calls to FastAPI /inference
+
+# generate_assets.py
+Pillow>=10.0.0         # image generation and manipulation
+pyttsx3>=2.90          # offline TTS for audio assets (optional)
+gtts>=2.5.0            # Google TTS fallback (optional, requires internet)

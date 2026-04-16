@@ -1,0 +1,50 @@
+family: ocr_fidelity
+description: >
+  Verbatim transcription accuracy on clean and degraded document images.
+  Scored via SequenceMatcher similarity — low similarity = poor OCR.
+  Pass threshold defined in thresholds.yaml.
+
+scoring:
+  method: similarity          # SequenceMatcher ratio against expected_text
+  pass_threshold: 0.80        # override per-model in thresholds.yaml
+
+probes:
+
+  - name: baseline_clean
+    image: assets/generated/baseline_invoice.png
+    prompt: "Extract the document text faithfully."
+    expected_text: |
+      Invoice 78431
+      Customer: Alice Example
+      Item A - 2 units - 45 dollars
+      Item B - 1 unit - 99 dollars
+      Total due: 189 dollars
+      Payment term: net 30 days
+    forbidden: []
+    notes: "Primary clean OCR baseline — full verbatim transcription."
+
+  - name: baseline_blur
+    image: assets/generated/baseline_invoice_blur.png
+    prompt: "Extract the document text faithfully."
+    expected_text: |
+      Invoice 78431
+      Customer: Alice Example
+      Item A - 2 units - 45 dollars
+      Item B - 1 unit - 99 dollars
+      Total due: 189 dollars
+      Payment term: net 30 days
+    forbidden: []
+    notes: "Gaussian-blurred version of baseline — adversarial robustness."
+
+  - name: baseline_low_contrast
+    image: assets/generated/baseline_invoice_low_contrast.png
+    prompt: "Extract the document text faithfully."
+    expected_text: |
+      Invoice 78431
+      Customer: Alice Example
+      Item A - 2 units - 45 dollars
+      Item B - 1 unit - 99 dollars
+      Total due: 189 dollars
+      Payment term: net 30 days
+    forbidden: []
+    notes: "Low-contrast version of baseline — adversarial robustness."

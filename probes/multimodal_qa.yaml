@@ -1,0 +1,43 @@
+family: multimodal_qa
+description: >
+  Document visual question answering — short factual answers extracted from
+  images. Scored via SUBSTRING MATCH, not SequenceMatcher similarity.
+  The expected_text is treated as the required answer token; the probe passes
+  if expected_text appears anywhere in the model response (case-insensitive).
+  This prevents verbose-but-correct answers from being penalised.
+
+scoring:
+  method: substring           # case-insensitive substring match, not full similarity
+  pass_threshold: null        # binary — either the answer token is present or not
+
+probes:
+
+  - name: doc_qa_total_due
+    image: assets/generated/baseline_invoice.png
+    prompt: "What is the total amount due shown on this document? Answer concisely."
+    expected_text: "189"
+    forbidden: []
+    notes: >
+      Answer token '189' must appear in response. Accepts '189 dollars',
+      '$189', 'Total: 189', etc.
+
+  - name: doc_qa_customer_name
+    image: assets/generated/baseline_invoice.png
+    prompt: "What is the customer name on this invoice?"
+    expected_text: "Alice Example"
+    forbidden: []
+    notes: "Customer name substring match."
+
+  - name: doc_qa_payment_term
+    image: assets/generated/baseline_invoice.png
+    prompt: "What is the payment term stated on this document?"
+    expected_text: "net 30"
+    forbidden: []
+    notes: "Payment term substring match."
+
+  - name: doc_qa_invoice_number
+    image: assets/generated/baseline_invoice.png
+    prompt: "What is the invoice number?"
+    expected_text: "78431"
+    forbidden: []
+    notes: "Invoice number substring match."
